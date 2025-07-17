@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState } from 'react';
 import { Plus, Trash2, Edit3, Save, X, GripVertical } from 'lucide-react';
 import { Question } from '../../types';
@@ -62,21 +64,11 @@ const FormBuilder: React.FC<FormBuilderProps> = ({ onSave, onCancel, initialData
   };
 
   const handleSave = () => {
-    if (!title.trim()) {
-      alert('Please enter a form title');
-      return;
-    }
-    
-    if (questions.length === 0) {
-      alert('Please add at least one question');
-      return;
-    }
+    if (!title.trim()) return alert('Please enter a form title');
+    if (questions.length === 0) return alert('Please add at least one question');
 
     const validQuestions = questions.filter(q => q.question.trim() !== '');
-    if (validQuestions.length === 0) {
-      alert('Please ensure all questions have content');
-      return;
-    }
+    if (validQuestions.length === 0) return alert('Please ensure all questions have content');
 
     onSave(title, description, validQuestions);
   };
@@ -84,7 +76,7 @@ const FormBuilder: React.FC<FormBuilderProps> = ({ onSave, onCancel, initialData
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <div className="card-3d">
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4 sm:gap-0">
           <div>
             <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
               {initialData ? 'Edit Form' : 'Create New Form'}
@@ -93,41 +85,37 @@ const FormBuilder: React.FC<FormBuilderProps> = ({ onSave, onCancel, initialData
               Build your feedback form with custom questions
             </p>
           </div>
-         <div className="flex space-x-3">
-  <button onClick={onCancel} className="btn-secondary bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-300 dark:hover:bg-red-900/40">
-    <X className="w-4 h-4 mr-2" />
-    Cancel
-  </button>
-  <button onClick={handleSave} className="btn-secondary bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-300 dark:hover:bg-green-900/40">
-    <Save className="w-4 h-4 mr-2" />
-    Save Form
-  </button>
-</div>
 
+          <div className="flex flex-col sm:flex-row w-full sm:w-auto space-y-2 sm:space-y-0 sm:space-x-3">
+            <button onClick={onCancel} className="btn-secondary bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-300 dark:hover:bg-red-900/40">
+              <X className="w-4 h-4 mr-2" />
+              Cancel
+            </button>
+            <button onClick={handleSave} className="btn-secondary bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-300 dark:hover:bg-green-900/40">
+              <Save className="w-4 h-4 mr-2" />
+              Save Form
+            </button>
+          </div>
         </div>
 
         <div className="space-y-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Form Title *
-              </label>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Form Title *</label>
               <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="input-field"
+                className="input-field w-full"
                 placeholder="Enter form title"
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Description (Optional)
-              </label>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Description (Optional)</label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="input-field"
+                className="input-field w-full"
                 rows={3}
                 placeholder="Brief description of your form"
               />
@@ -135,26 +123,29 @@ const FormBuilder: React.FC<FormBuilderProps> = ({ onSave, onCancel, initialData
           </div>
 
           <div>
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-4 sm:gap-0">
               <h3 className="text-xl font-bold text-gray-900 dark:text-white">Questions</h3>
-              <button onClick={addQuestion} className="btn-primary bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700">
-  <Plus className="w-4 h-4 mr-2" />
-  Add Question
-</button>
-
+              <button
+                onClick={addQuestion}
+                className="btn-primary bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add Question
+              </button>
             </div>
 
             <div className="space-y-6">
               {questions.map((question, index) => (
                 <div key={index} className="glass-card border-l-4 border-blue-500">
-                  <div className="flex justify-between items-start mb-4">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
                     <div className="flex items-center space-x-3">
                       <GripVertical className="w-5 h-5 text-gray-400" />
                       <span className="text-sm font-semibold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-full">
                         Question {index + 1}
                       </span>
                     </div>
-                    <div className="flex space-x-2">
+
+                    <div className="flex justify-end sm:justify-start space-x-2 w-full sm:w-auto">
                       <button
                         onClick={() => setEditingIndex(editingIndex === index ? null : index)}
                         className="p-2 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all duration-300"
@@ -176,15 +167,15 @@ const FormBuilder: React.FC<FormBuilderProps> = ({ onSave, onCancel, initialData
                         type="text"
                         value={question.question}
                         onChange={(e) => updateQuestion(index, 'question', e.target.value)}
-                        className="input-field"
+                        className="input-field w-full"
                         placeholder="Enter your question"
                       />
 
-                      <div className="flex items-center space-x-6">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                         <select
                           value={question.type}
                           onChange={(e) => updateQuestion(index, 'type', e.target.value)}
-                          className="input-field w-auto"
+                          className="input-field w-full sm:w-auto"
                         >
                           <option value="text">Text Answer</option>
                           <option value="multiple-choice">Multiple Choice</option>
@@ -207,12 +198,12 @@ const FormBuilder: React.FC<FormBuilderProps> = ({ onSave, onCancel, initialData
                             Options:
                           </label>
                           {(question.options || []).map((option, optionIndex) => (
-                            <div key={optionIndex} className="flex items-center space-x-3">
+                            <div key={optionIndex} className="flex flex-col sm:flex-row sm:items-center gap-2">
                               <input
                                 type="text"
                                 value={option}
                                 onChange={(e) => updateOption(index, optionIndex, e.target.value)}
-                                className="input-field"
+                                className="input-field w-full"
                                 placeholder={`Option ${optionIndex + 1}`}
                               />
                               <button
@@ -237,7 +228,7 @@ const FormBuilder: React.FC<FormBuilderProps> = ({ onSave, onCancel, initialData
                       <p className="font-semibold text-gray-900 dark:text-white mb-2 text-lg">
                         {question.question || 'Untitled Question'}
                       </p>
-                      <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
+                      <div className="flex flex-wrap items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
                         <span className="capitalize bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
                           {question.type}
                         </span>

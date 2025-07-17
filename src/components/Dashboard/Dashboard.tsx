@@ -41,7 +41,6 @@ const Dashboard: React.FC = () => {
 
   const handleEditForm = async (title: string, description: string, questions: any[]) => {
     if (!editingForm) return;
-    
     try {
       await api.updateForm(editingForm._id, { title, description, questions });
       setEditingForm(null);
@@ -52,10 +51,7 @@ const Dashboard: React.FC = () => {
   };
 
   const handleDeleteForm = async (formId: string) => {
-    if (!confirm('Are you sure you want to delete this form? This action cannot be undone.')) {
-      return;
-    }
-
+    if (!confirm('Are you sure you want to delete this form?')) return;
     try {
       await api.deleteForm(formId);
       loadForms();
@@ -76,121 +72,54 @@ const Dashboard: React.FC = () => {
     avgResponsesPerForm: forms.length > 0 ? Math.round(forms.reduce((sum, form) => sum + form.responseCount, 0) / forms.length) : 0,
   };
 
-  if (showFormBuilder) {
-    return (
-      <FormBuilder
-        onSave={handleCreateForm}
-        onCancel={() => setShowFormBuilder(false)}
-      />
-    );
-  }
-
-  if (editingForm) {
-    return (
-      <FormBuilder
-        onSave={handleEditForm}
-        onCancel={() => setEditingForm(null)}
-        initialData={{
-          title: editingForm.title,
-          description: editingForm.description || '',
-          questions: editingForm.questions,
-        }}
-      />
-    );
-  }
-
-  if (viewingResponses) {
-    return (
-      <ResponsesView
-        form={viewingResponses}
-        onBack={() => setViewingResponses(null)}
-      />
-    );
-  }
+  if (showFormBuilder) return <FormBuilder onSave={handleCreateForm} onCancel={() => setShowFormBuilder(false)} />;
+  if (editingForm) return <FormBuilder onSave={handleEditForm} onCancel={() => setEditingForm(null)} initialData={{ title: editingForm.title, description: editingForm.description || '', questions: editingForm.questions }} />;
+  if (viewingResponses) return <ResponsesView form={viewingResponses} onBack={() => setViewingResponses(null)} />;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-8 space-y-4 lg:space-y-0">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-8">
         <div>
           <h1 className="text-4xl font-bold text-gradient mb-2">Dashboard</h1>
           <p className="text-gray-600 dark:text-gray-300 text-lg">Manage your feedback forms and analyze responses</p>
         </div>
-        <button
-          onClick={() => setShowFormBuilder(true)}
-          className="btn-primary animate-float"
-        >
+        <button onClick={() => setShowFormBuilder(true)} className="btn-primary animate-float">
           <Plus className="w-5 h-5 mr-2" />
           Create New Form
         </button>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div className="card-3d group">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Forms</p>
-              <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">{stats.totalForms}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">All time</p>
-            </div>
-            <div className="p-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl group-hover:scale-110 transition-transform duration-300">
-              <FileText className="w-6 h-6 text-white" />
-            </div>
-          </div>
-        </div>
-
-        <div className="card-3d group">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Active Forms</p>
-              <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">{stats.activeForms}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Currently collecting</p>
-            </div>
-            <div className="p-3 bg-gradient-to-r from-green-500 to-green-600 rounded-xl group-hover:scale-110 transition-transform duration-300">
-              <TrendingUp className="w-6 h-6 text-white" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {[
+          { label: 'Total Forms', value: stats.totalForms, icon: <FileText className="w-6 h-6 text-white" />, color: 'from-blue-500 to-blue-600' },
+          { label: 'Active Forms', value: stats.activeForms, icon: <TrendingUp className="w-6 h-6 text-white" />, color: 'from-green-500 to-green-600' },
+          { label: 'Total Responses', value: stats.totalResponses, icon: <Users className="w-6 h-6 text-white" />, color: 'from-purple-500 to-purple-600' },
+          { label: 'Avg per Form', value: stats.avgResponsesPerForm, icon: <Activity className="w-6 h-6 text-white" />, color: 'from-orange-500 to-orange-600' },
+        ].map((stat, idx) => (
+          <div key={idx} className="card-3d group">
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{stat.label}</p>
+                <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">{stat.value}</p>
+              </div>
+              <div className={`p-3 bg-gradient-to-r ${stat.color} rounded-xl group-hover:scale-110 transition-transform duration-300`}>
+                {stat.icon}
+              </div>
             </div>
           </div>
-        </div>
-
-        <div className="card-3d group">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Responses</p>
-              <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">{stats.totalResponses}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">All forms combined</p>
-            </div>
-            <div className="p-3 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl group-hover:scale-110 transition-transform duration-300">
-              <Users className="w-6 h-6 text-white" />
-            </div>
-          </div>
-        </div>
-
-        <div className="card-3d group">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Avg per Form</p>
-              <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">{stats.avgResponsesPerForm}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Response rate</p>
-            </div>
-            <div className="p-3 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl group-hover:scale-110 transition-transform duration-300">
-              <Activity className="w-6 h-6 text-white" />
-            </div>
-          </div>
-        </div>
+        ))}
       </div>
 
-      {/* Search and Filter */}
       <div className="card mb-8">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0">
-          <div className="relative">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="relative w-full sm:w-80">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               type="text"
               placeholder="Search forms..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="input-field pl-10 w-full sm:w-80"
+              className="input-field pl-10 w-full"
             />
           </div>
           <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -199,15 +128,11 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Forms Grid */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Your Forms</h2>
-        </div>
-        
+      <div>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Your Forms</h2>
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
+            {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="card">
                 <div className="skeleton h-6 mb-3"></div>
                 <div className="skeleton h-4 mb-2"></div>
@@ -221,23 +146,17 @@ const Dashboard: React.FC = () => {
           </div>
         ) : filteredForms.length === 0 ? (
           <div className="text-center py-16">
-            <div className="animate-float">
-              <FileText className="w-20 h-20 text-gray-400 dark:text-gray-500 mx-auto mb-6" />
-            </div>
+            <FileText className="w-20 h-20 text-gray-400 dark:text-gray-500 mx-auto mb-6 animate-float" />
             <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
               {forms.length === 0 ? 'No forms yet' : 'No matching forms'}
             </h3>
             <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
               {forms.length === 0 
                 ? 'Create your first feedback form to start collecting valuable insights from your customers'
-                : 'Try adjusting your search terms to find the forms you\'re looking for'
-              }
+                : 'Try adjusting your search terms to find the forms you\'re looking for'}
             </p>
             {forms.length === 0 && (
-              <button
-                onClick={() => setShowFormBuilder(true)}
-                className="btn-primary"
-              >
+              <button onClick={() => setShowFormBuilder(true)} className="btn-primary">
                 <Plus className="w-5 h-5 mr-2" />
                 Create Your First Form
               </button>
@@ -245,7 +164,7 @@ const Dashboard: React.FC = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredForms.map((form) => (
+            {filteredForms.map(form => (
               <FormCard
                 key={form._id}
                 form={form}
